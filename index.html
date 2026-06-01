@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>警備教育システム ｜ 画面モック プロトタイプ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#16223D; --navy2:#1E2D4D; --navy-deep:#0C1426; --gold:#AE8642; --gold-soft:#D3B777;
+    --bg:#EEF0F4; --card:#FFFFFF; --ink:#1F242C;
+    --ink-soft:#5B626E; --faint:#959BA6; --line:#E5E7EC; --line2:#EEF0F3;
+    --crimson:#8F2F2C; --crimson-bg:#FBEDEC; --forest:#2C5A45; --forest-bg:#EAF1EC;
+    --amber:#9A6B17; --amber-bg:#FBF3E2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);font-feature-settings:"palt";-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.7;}
+  .serif{font-family:"Noto Serif JP",serif;}
+  .app{display:flex;min-height:100vh;}
+
+  .side{width:280px;flex-shrink:0;background:var(--navy-deep);color:#C7CCD8;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .side-head{padding:22px 22px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+  .side-brand{font-family:"Noto Serif JP",serif;font-weight:700;font-size:17px;color:#fff;}
+  .side-brand span{color:var(--gold-soft);}
+  .side-sub{font-size:10.5px;color:#7E8597;letter-spacing:.16em;margin-top:3px;}
+  .side-note{font-size:10px;color:#7E8597;margin-top:9px;line-height:1.6;background:rgba(255,255,255,.04);padding:8px 10px;border-radius:7px;}
+  .nav-group{padding:14px 12px 4px;}
+  .nav-label{font-size:10px;letter-spacing:.14em;color:var(--gold-soft);padding:0 10px 6px;display:flex;align-items:center;gap:7px;}
+  .nav-label .role-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
+  .nav a{display:flex;align-items:center;gap:9px;color:#AAB0BF;text-decoration:none;font-size:12.5px;padding:7px 11px;border-radius:7px;cursor:pointer;transition:.15s;border-left:2px solid transparent;}
+  .nav a:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .nav a.active{background:rgba(174,134,66,.18);color:#fff;border-left-color:var(--gold);font-weight:500;}
+  .nav a .ix{width:18px;text-align:center;font-size:11px;color:var(--gold-soft);flex-shrink:0;}
+  .nav a.active .ix{color:var(--gold);}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{background:#fff;border-bottom:1px solid var(--line);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .tb-crumb{font-size:11px;color:var(--faint);}
+  .tb-title{font-family:"Noto Serif JP",serif;font-weight:700;font-size:17px;color:var(--navy);}
+  .tb-right{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--ink-soft);}
+  .ctx-chip{background:#EEF1F6;border-radius:6px;padding:4px 11px;font-size:11px;color:var(--navy);font-weight:600;}
+  .demo-tag{background:var(--amber-bg);color:var(--amber);border-radius:6px;padding:4px 10px;font-size:10.5px;font-weight:700;}
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+
+  .canvas{padding:24px 26px 80px;max-width:1080px;width:100%;}
+  .screen{display:none;}
+  .screen.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .scr-intro{font-size:12px;color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 9px 9px 0;padding:11px 15px;margin-bottom:20px;}
+  .scr-intro b{color:var(--navy);}
+
+  h3.sec{font-size:13px;color:var(--navy);font-weight:700;margin:22px 0 12px;display:flex;align-items:center;gap:9px;}
+  h3.sec::before{content:"";width:4px;height:14px;background:var(--gold);border-radius:2px;}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;}
+  .card-h{font-weight:700;font-size:13px;color:var(--navy);margin-bottom:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+
+  .grid{display:grid;gap:14px;}
+  .g2{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:repeat(3,1fr);} .g4{grid-template-columns:repeat(4,1fr);}
+
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:11px;padding:15px 17px;}
+  .kpi .kv{font-family:"Noto Serif JP",serif;font-weight:700;font-size:25px;color:var(--navy);line-height:1.1;}
+  .kpi .kv small{font-size:12px;color:var(--faint);font-family:"Noto Sans JP";}
+  .kpi .kl{font-size:11px;color:var(--faint);margin-top:3px;}
+  .kpi.green .kv{color:var(--forest);} .kpi.gold .kv{color:var(--gold);} .kpi.red .kv{color:var(--crimson);}
+
+  .btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.12s;}
+  .btn:active{transform:scale(.97);}
+  .btn-gold{background:var(--gold);color:#fff;} .btn-navy{background:var(--navy);color:#fff;}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--navy);} .btn-green{background:var(--forest);color:#fff;}
+  .btn-sm{padding:5px 11px;font-size:11px;}
+
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th{background:#F6F7F9;color:var(--ink-soft);text-align:left;padding:9px 12px;font-weight:700;font-size:11px;border-bottom:1px solid var(--line);}
+  td{padding:9px 12px;border-bottom:1px solid var(--line2);color:var(--ink-soft);}
+  td strong{color:var(--navy);}
+  tr:last-child td{border-bottom:none;}
+  .tbl-wrap{background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden;}
+  tbody tr.clickrow{cursor:pointer;} tbody tr.clickrow:hover{background:#F6F7F9;}
+
+  .pill{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap;}
+  .p-green{background:var(--forest-bg);color:var(--forest);} .p-gold{background:var(--amber-bg);color:var(--amber);}
+  .p-red{background:var(--crimson-bg);color:var(--crimson);} .p-navy{background:#E5E9F0;color:var(--navy);} .p-gray{background:#ECEDEF;color:#6A707A;}
+
+  .bar{height:6px;background:#EAECEF;border-radius:4px;overflow:hidden;width:88px;display:inline-block;vertical-align:middle;}
+  .bar i{display:block;height:100%;}
+
+  .alert{border-radius:9px;padding:10px 14px;font-size:11.5px;display:flex;gap:9px;align-items:center;margin-bottom:14px;font-weight:500;}
+  .alert .ai{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+  .a-red{background:var(--crimson-bg);border:1px solid #E8CFCD;color:var(--crimson);} .a-red .ai{background:var(--crimson);}
+  .a-amber{background:var(--amber-bg);border:1px solid #EAD9B3;color:var(--amber);} .a-amber .ai{background:var(--amber);}
+  .a-green{background:var(--forest-bg);border:1px solid #CADBCF;color:var(--forest);} .a-green .ai{background:var(--forest);}
+
+  .vstage{background:linear-gradient(150deg,#1C2A47,#0B1322);border-radius:11px;height:240px;position:relative;display:flex;align-items:center;justify-content:center;}
+  .vbadge{position:absolute;top:12px;left:12px;background:rgba(174,134,66,.95);color:#fff;font-size:10.5px;font-weight:700;padding:4px 11px;border-radius:6px;}
+  .vtime{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.14);color:#fff;font-size:10.5px;padding:4px 11px;border-radius:6px;}
+  .vplay{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .vplay::after{content:"";border-left:19px solid var(--navy);border-top:12px solid transparent;border-bottom:12px solid transparent;margin-left:5px;}
+  .vplay.paused::after{border:none;width:16px;height:20px;border-left:6px solid var(--navy);border-right:6px solid var(--navy);margin:0;}
+  .vctrl{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:8px;align-items:center;}
+  .vc{background:rgba(255,255,255,.92);color:var(--navy);font-size:11px;font-weight:700;padding:7px 13px;border-radius:7px;cursor:pointer;user-select:none;}
+  .vc.main{background:var(--gold);color:#fff;}
+  .vprog{flex:1;height:6px;background:rgba(255,255,255,.25);border-radius:4px;overflow:hidden;}
+  .vprog i{display:block;height:100%;width:62%;background:var(--gold);}
+
+  .att{display:flex;align-items:center;gap:9px;padding:8px 4px;font-size:12px;border-bottom:1px solid var(--line2);cursor:pointer;}
+  .att:last-child{border-bottom:none;}
+  .att:hover{background:#FAFBFC;}
+  .ax{width:18px;height:18px;border-radius:5px;flex-shrink:0;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .ax-on{background:var(--forest);color:#fff;} .ax-now{background:var(--gold);color:#fff;} .ax-off{background:#E3E5E9;color:#9AA0AB;}
+
+  .paper{background:#fff;border:1px solid var(--line);border-radius:6px;padding:22px 26px;box-shadow:0 1px 0 var(--line);}
+  .paper-t{text-align:center;font-family:"Noto Serif JP",serif;font-weight:700;font-size:17px;color:var(--navy);letter-spacing:.14em;}
+  .paper-s{text-align:center;font-size:10.5px;color:var(--faint);margin-bottom:14px;}
+  .paper-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-soft);margin:10px 0;}
+  .frow{display:flex;border:1px solid var(--line);border-top:none;font-size:11.5px;align-items:stretch;}
+  .frow:first-of-type{border-top:1px solid var(--line);}
+  .fl{width:150px;flex-shrink:0;background:#F6F7F9;padding:8px 11px;color:var(--ink-soft);font-weight:700;border-right:1px solid var(--line);display:flex;align-items:center;}
+  .fv{flex:1;padding:6px 8px;color:var(--navy);display:flex;align-items:center;gap:6px;}
+  .fv input.docfield{border:1px solid transparent;background:transparent;width:100%;font-family:inherit;font-size:11.5px;color:var(--navy);padding:4px 6px;border-radius:5px;}
+  .fv input.docfield:hover{border-color:var(--line);background:#FCFCFD;}
+  .fv input.docfield:focus{border-color:var(--gold);background:#fff;outline:none;}
+  .auto{font-size:10px;color:var(--forest);font-weight:700;background:var(--forest-bg);padding:1px 6px;border-radius:4px;white-space:nowrap;}
+
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:11px;color:var(--faint);font-weight:700;margin-bottom:4px;}
+  .field input.inp, .field textarea.inp, .field select.inp{
+    width:100%;border:1px solid var(--line);border-radius:7px;padding:8px 11px;font-size:12.5px;color:var(--navy);background:#FBFBFC;font-family:inherit;line-height:1.6;transition:.12s;
+  }
+  .field textarea.inp{resize:vertical;min-height:60px;}
+  .field input.inp:hover, .field textarea.inp:hover, .field select.inp:hover{border-color:#CFD3DB;}
+  .field input.inp:focus, .field textarea.inp:focus, .field select.inp:focus{border-color:var(--gold);background:#fff;outline:none;box-shadow:0 0 0 3px rgba(174,134,66,.12);}
+  input.search{width:100%;border:1px solid var(--line);border-radius:7px;padding:8px 11px;font-size:12.5px;color:var(--navy);background:#FBFBFC;font-family:inherit;}
+  input.search:focus{border-color:var(--gold);background:#fff;outline:none;box-shadow:0 0 0 3px rgba(174,134,66,.12);}
+
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;}
+  .seg label{padding:6px 14px;font-size:11.5px;color:var(--ink-soft);border-right:1px solid var(--line);cursor:pointer;user-select:none;transition:.12s;}
+  .seg label:last-child{border-right:none;}
+  .seg input{display:none;}
+  .seg input:checked + label{background:var(--navy);color:#fff;font-weight:700;}
+  .seg label:hover{background:#F2F3F6;}
+  .seg input:checked + label:hover{background:var(--navy);}
+
+  .chk{display:flex;align-items:center;gap:9px;padding:8px 4px;font-size:12px;border-bottom:1px solid var(--line2);cursor:pointer;user-select:none;}
+  .chk:last-child{border-bottom:none;}
+  .chk:hover{background:#FAFBFC;}
+  .chk input{width:17px;height:17px;accent-color:var(--forest);cursor:pointer;flex-shrink:0;}
+
+  .doc-tile{background:#fff;border:1px solid var(--line);border-radius:11px;padding:15px;}
+  .doc-tile .dt-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+  .doc-tile .dt-ic{width:34px;height:34px;border-radius:8px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .doc-tile .dt-t{font-weight:700;font-size:13px;color:var(--navy);}
+  .doc-tile .dt-law{font-size:10px;color:var(--faint);}
+
+  .insp{display:flex;align-items:center;gap:11px;padding:11px 14px;background:#fff;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;}
+  .insp .ic{width:22px;height:22px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;}
+  .ic-ok{background:var(--forest);} .ic-no{background:#D7DAE0;color:#9AA0AB;}
+  .insp .iname{flex:1;color:var(--navy);font-weight:600;font-size:12.5px;}
+
+  .step{display:flex;gap:10px;margin:6px 0 16px;}
+  .step .s{flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 15px;}
+  .step .s .sn{font-size:10px;color:var(--gold);font-weight:700;letter-spacing:.08em;}
+  .step .s .st{font-weight:700;font-size:12.5px;color:var(--navy);margin:3px 0;}
+  .step .s .sd{font-size:11px;color:var(--ink-soft);}
+  .step .arr{display:flex;align-items:center;color:var(--gold);font-weight:700;}
+
+  .photo{width:84px;height:104px;border-radius:8px;background:linear-gradient(135deg,#E7EAF0,#D7DCE6);display:flex;align-items:center;justify-content:center;color:#9AA2B2;font-size:11px;border:1px solid var(--line);flex-shrink:0;text-align:center;cursor:pointer;}
+  .photo:hover{border-color:var(--gold);}
+
+  .vault-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line2);font-size:12px;}
+  .vault-row:last-child{border-bottom:none;}
+
+  .note{font-size:11px;color:var(--faint);margin-top:8px;}
+  .mini{font-size:10.5px;color:var(--faint);}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10.5px;color:var(--faint);margin-top:10px;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .dotc{width:9px;height:9px;border-radius:3px;display:inline-block;}
+
+  #toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(22px);background:var(--navy);color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:700;box-shadow:0 14px 38px rgba(0,0,0,.28);opacity:0;transition:.25s;z-index:9999;pointer-events:none;max-width:84vw;text-align:center;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media(max-width:900px){.side{display:none;}.g2,.g3,.g4{grid-template-columns:1fr;}.step{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="side">
+    <div class="side-head">
+      <div class="side-brand">警備教育<span>システム</span></div>
+      <div class="side-sub">SCREEN PROTOTYPE v0.2</div>
+      <div class="side-note">左メニューで画面切替。入力欄は実際に入力でき、ボタン・チェック・タブも反応します。ワイヤーフレーム（叩き台）であり確定デザインではありません。</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-group">
+        <div class="nav-label"><span class="role-dot"></span>営業所管理者（指導教育責任者）</div>
+        <a data-s="dash" class="active"><span class="ix">D</span>ダッシュボード</a>
+        <a data-s="guards"><span class="ix">≡</span>警備員一覧</a>
+        <a data-s="guard"><span class="ix">▤</span>警備員 詳細・登録</a>
+        <a data-s="plan"><span class="ix">▥</span>教育計画（教育期）</a>
+        <a data-s="session"><span class="ix">▶</span>集合教育 実施（動画）</a>
+        <a data-s="test"><span class="ix">✓</span>理解度テスト 結果</a>
+        <a data-s="qa"><span class="ix">?</span>質疑応答 記録</a>
+        <a data-s="docs"><span class="ix">▦</span>法定書類センター</a>
+        <a data-s="pv-roster"><span class="ix">名</span>プレビュー：警備員名簿</a>
+        <a data-s="pv-jisshi"><span class="ix">実</span>プレビュー：教育実施簿</a>
+        <a data-s="pv-keikaku"><span class="ix">計</span>プレビュー：教育計画書</a>
+        <a data-s="pv-shido"><span class="ix">指</span>プレビュー：指導計画書</a>
+        <a data-s="attach"><span class="ix">+</span>添付書類センター</a>
+        <a data-s="at-kakunin"><span class="ix">確</span>添付：確認票 作成</a>
+        <a data-s="at-seiyaku"><span class="ix">誓</span>添付：誓約書 作成</a>
+        <a data-s="at-free"><span class="ix">±</span>添付：自由様式・貼付</a>
+        <a data-s="vault"><span class="ix">▣</span>保管庫（保存期限）</a>
+        <a data-s="alerts"><span class="ix">!</span>アラート一覧</a>
+        <a data-s="inspection"><span class="ix">★</span>立入検査モード</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label"><span class="role-dot"></span>法人管理者（本社）</div>
+        <a data-s="hq"><span class="ix">H</span>法人ダッシュボード</a>
+        <a data-s="offices"><span class="ix">⌂</span>営業所 一覧・追加</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label"><span class="role-dot"></span>システム管理者（ThreeX）</div>
+        <a data-s="tenants"><span class="ix">⚙</span>テナント管理</a>
+        <a data-s="videos"><span class="ix">▷</span>教育動画マスタ</a>
+        <a data-s="templates"><span class="ix">▭</span>様式テンプレート</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label"><span class="role-dot"></span>警備員（受講者）</div>
+        <a data-s="learner"><span class="ix">◉</span>受講者ビュー</a>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="tb-crumb" id="crumb">営業所管理者 ／ ダッシュボード</div>
+        <div class="tb-title" id="title">ダッシュボード</div>
+      </div>
+      <div class="tb-right">
+        <span class="demo-tag">プロトタイプ</span>
+        <span class="ctx-chip" id="ctx">北営業所</span>
+        <span id="who">指導教育責任者 佐藤</span>
+        <span class="avatar" id="ava">佐</span>
+      </div>
+    </div>
+
+    <div class="canvas">
+
+      <!-- DASHBOARD -->
+      <div class="screen active" id="dash">
+        <div class="scr-intro"><b>営業所の状況を一目で。</b>教育の進捗、期限の迫った書類、未実施者を把握する起点の画面です。</div>
+        <div class="alert a-amber"><span class="ai">!</span>教育計画書の備付け期限（教育期開始30日前）まで、あと <b style="margin:0 4px;">8日</b>。計画書の確定をお願いします。 <button class="btn btn-sm btn-ghost" data-s="plan" style="margin-left:auto;">計画へ</button></div>
+        <div class="grid g4" style="margin-bottom:16px;">
+          <div class="kpi"><div class="kv">12<small> 名</small></div><div class="kl">受講対象者</div></div>
+          <div class="kpi green"><div class="kv">7<small> 名</small></div><div class="kl">教育完了</div></div>
+          <div class="kpi gold"><div class="kv">4<small> 名</small></div><div class="kl">受講中</div></div>
+          <div class="kpi red"><div class="kv">1<small> 名</small></div><div class="kl">未実施</div></div>
+        </div>
+        <div class="grid g2">
+          <div class="card">
+            <div class="card-h">教育の進捗 <button class="btn btn-sm btn-ghost" data-s="guards">一覧へ</button></div>
+            <div class="tbl-wrap" style="border:none;">
+              <table>
+                <tr><th>警備員</th><th>コース</th><th>進捗</th><th>状態</th></tr>
+                <tr class="clickrow" data-s="guard"><td><strong>鈴木 花子</strong></td><td>新任 一般20h</td><td><span class="bar"><i style="width:100%;background:var(--forest)"></i></span></td><td><span class="pill p-green">完了</span></td></tr>
+                <tr class="clickrow" data-s="guard"><td><strong>田中 一郎</strong></td><td>新任 一般20h</td><td><span class="bar"><i style="width:62%;background:var(--gold)"></i></span></td><td><span class="pill p-gold">受講中</span></td></tr>
+                <tr class="clickrow" data-s="guard"><td><strong>渡辺 修</strong></td><td>新任 一般20h</td><td><span class="bar"><i style="width:0"></i></span></td><td><span class="pill p-red">未実施</span></td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h">直近の期限・アラート <button class="btn btn-sm btn-ghost" data-s="alerts">すべて</button></div>
+            <div class="alert a-amber" style="margin-bottom:9px;"><span class="ai">!</span>教育計画書 備付け期限 ― あと8日</div>
+            <div class="alert a-amber" style="margin-bottom:9px;"><span class="ai">!</span>高橋 健 の確認票が未登録</div>
+            <div class="alert a-red" style="margin-bottom:0;"><span class="ai">!</span>顔写真の更新期限（3年）超過 ― 1名</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">クイック操作</div>
+          <button class="btn btn-gold" data-s="session">▶ 集合教育を開始</button>
+          <button class="btn btn-ghost" data-s="docs" style="margin-left:8px;">▦ 法定書類を生成</button>
+          <button class="btn btn-ghost" data-s="at-kakunin" style="margin-left:8px;">確 添付書類を作成</button>
+          <button class="btn btn-ghost" data-s="inspection" style="margin-left:8px;">★ 立入検査モード</button>
+        </div>
+      </div>
+
+      <!-- GUARDS -->
+      <div class="screen" id="guards">
+        <div class="scr-intro"><b>営業所に所属する警備員の一覧。</b>名簿の素になるマスタです。検索欄に文字を入れると一覧が絞り込まれます。行をクリックで詳細へ。</div>
+        <div class="card" style="display:flex;align-items:center;gap:10px;">
+          <input class="search" id="guardSearch" placeholder="氏名で検索（例：田中）">
+          <button class="btn btn-navy" data-s="guard">＋ 警備員を登録</button>
+        </div>
+        <div class="tbl-wrap">
+          <table id="guardTable">
+            <thead><tr><th>氏名</th><th>採用日</th><th>従事業務</th><th>教育進捗</th><th>誓約書</th><th>確認票</th><th>顔写真</th><th></th></tr></thead>
+            <tbody>
+            <tr class="clickrow" data-s="guard" data-name="鈴木 花子 すずき はなこ"><td><strong>鈴木 花子</strong><div class="mini">1995/06/12</div></td><td>2026/04/01</td><td>2号（交通誘導）</td><td><span class="pill p-green">完了</span></td><td><span class="pill p-green">✓</span></td><td><span class="pill p-green">✓</span></td><td><span class="pill p-green">✓</span></td><td><button class="btn btn-sm btn-ghost" data-s="guard">詳細</button></td></tr>
+            <tr class="clickrow" data-s="guard" data-name="田中 一郎 たなか いちろう"><td><strong>田中 一郎</strong><div class="mini">1998/04/01</div></td><td>2026/04/01</td><td>2号（交通誘導）</td><td><span class="pill p-gold">62%</span></td><td><span class="pill p-green">✓</span></td><td><span class="pill p-green">✓</span></td><td><span class="pill p-green">✓</span></td><td><button class="btn btn-sm btn-ghost" data-s="guard">詳細</button></td></tr>
+            <tr class="clickrow" data-s="guard" data-name="高橋 健 たかはし けん"><td><strong>高橋 健</strong><div class="mini">1990/11/20</div></td><td>2026/03/15</td><td>2号（交通誘導）</td><td><span class="pill p-green">完了</span></td><td><span class="pill p-green">✓</span></td><td><span class="pill p-red">未</span></td><td><span class="pill p-green">✓</span></td><td><button class="btn btn-sm btn-ghost" data-s="guard">詳細</button></td></tr>
+            <tr class="clickrow" data-s="guard" data-name="渡辺 修 わたなべ おさむ"><td><strong>渡辺 修</strong><div class="mini">2001/02/08</div></td><td>2026/05/01</td><td>2号（交通誘導）</td><td><span class="pill p-red">未実施</span></td><td><span class="pill p-red">未</span></td><td><span class="pill p-red">未</span></td><td><span class="pill p-gold">期限</span></td><td><button class="btn btn-sm btn-ghost" data-s="guard">詳細</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="legend"><span><span class="dotc" style="background:var(--forest)"></span>完了/登録済</span><span><span class="dotc" style="background:var(--gold)"></span>進行中/要対応</span><span><span class="dotc" style="background:var(--crimson)"></span>未登録/未実施</span></div>
+      </div>
+
+      <!-- GUARD DETAIL -->
+      <div class="screen" id="guard">
+        <div class="scr-intro"><b>警備員1名のマスタ。</b>各欄に直接入力できます。ここに入った情報が、そのまま名簿・誓約書・確認票に差し込まれます。</div>
+        <div class="card">
+          <div class="card-h">基本情報</div>
+          <div style="display:flex;gap:20px;">
+            <div class="photo" data-toast="（プロトタイプ）顔写真をアップロードします">顔写真<br>クリックで<br>アップロード</div>
+            <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="field"><label>氏名</label><input class="inp" value="田中 一郎"></div>
+              <div class="field"><label>生年月日</label><input class="inp" type="date" value="1998-04-01"></div>
+              <div class="field"><label>本籍</label><input class="inp" value="東京都◯◯区…"></div>
+              <div class="field"><label>住所</label><input class="inp" value="東京都◯◯区…"></div>
+              <div class="field"><label>採用年月日</label><input class="inp" type="date" value="2026-04-01"></div>
+              <div class="field"><label>退職年月日</label><input class="inp" type="date"></div>
+            </div>
+          </div>
+          <button class="btn btn-green" style="margin-top:6px;">この内容で保存</button>
+        </div>
+        <div class="grid g2">
+          <div class="card">
+            <div class="card-h">従事業務・資格</div>
+            <div class="field"><label>従事する警備業務</label>
+              <select class="inp"><option>2号警備（交通誘導警備）</option><option>1号警備（施設警備）</option><option>3号警備（輸送警備）</option><option>4号警備（身辺警備）</option></select>
+            </div>
+            <div class="field"><label>検定・指導教育責任者資格</label><input class="inp" placeholder="未登録（入力して追加）"></div>
+          </div>
+          <div class="card">
+            <div class="card-h">添付書類（名簿に紐づく）</div>
+            <div class="att" style="cursor:default;"><span class="ax ax-on">✓</span>誓約書（警備員用）<span class="mini" style="margin-left:auto;">2026/04/01</span><button class="btn btn-sm btn-ghost" data-s="at-seiyaku" style="margin-left:8px;">表示</button></div>
+            <div class="att" style="cursor:default;"><span class="ax ax-on">✓</span>確認票<span class="mini" style="margin-left:auto;">2026/04/01</span><button class="btn btn-sm btn-ghost" data-s="at-kakunin" style="margin-left:8px;">表示</button></div>
+            <div class="att" style="cursor:default;"><span class="ax ax-off">+</span>自由様式を追加<button class="btn btn-sm btn-ghost" data-s="at-free" style="margin-left:auto;">追加</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">教育の履歴</div>
+          <div class="tbl-wrap" style="border:none;">
+            <table>
+              <tr><th>教育期</th><th>区分</th><th>受講時間</th><th>テスト</th><th>状態</th></tr>
+              <tr><td>2026年度 第1期</td><td>新任 一般</td><td>12.4h / 20h</td><td>―</td><td><span class="pill p-gold">受講中</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAN -->
+      <div class="screen" id="plan">
+        <div class="scr-intro"><b>教育期の計画を立てる。</b>各欄は入力でき、コースのチェックも切り替えられます。ここで組んだ内容が <b>教育計画書（規則66条1項5号）</b> になります。</div>
+        <div class="alert a-amber"><span class="ai">!</span>この教育期の備付け期限まで あと8日。計画を確定してください。</div>
+        <div class="grid g2">
+          <div class="card">
+            <div class="card-h">教育期の設定</div>
+            <div class="field"><label>年度・教育期</label><input class="inp" value="2026年度 第1教育期"></div>
+            <div class="field"><label>実施開始日</label><input class="inp" type="date" value="2026-04-08"></div>
+            <div class="field"><label>実施終了日</label><input class="inp" type="date" value="2026-04-30"></div>
+            <div class="field"><label>実施者（指導教育責任者）</label><input class="inp" value="佐藤 三郎"></div>
+          </div>
+          <div class="card">
+            <div class="card-h">割り当てるコース（チェックで選択）</div>
+            <label class="chk"><input type="checkbox" checked> 基本教育（15h）</label>
+            <label class="chk"><input type="checkbox" checked> 業務別教育 2号・講義（3h）</label>
+            <label class="chk"><input type="checkbox" checked> 業務別教育 2号・実技（2h）<span class="pill p-navy" style="margin-left:auto;">対面</span></label>
+            <label class="chk"><input type="checkbox"> 業務別教育 1号・講義（3h）</label>
+            <div class="note">チェックした合計が新任（一般）20hの要件を満たすか自動計算する想定です。</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">計画メモ（自由記入）</div>
+          <div class="field"><textarea class="inp" placeholder="補足事項や実施上の注意点を入力…">第1教育期は新任12名を対象に実施。実技は訓練室を使用。</textarea></div>
+          <button class="btn btn-green">この計画を確定 → 教育計画書を生成</button><button class="btn btn-ghost" data-s="pv-keikaku" style="margin-left:8px;">プレビュー</button>
+        </div>
+      </div>
+
+      <!-- SESSION -->
+      <div class="screen" id="session">
+        <div class="scr-intro"><b>集合教育の実施画面。</b>動画の再生／一時停止ボタン、出席者の行をクリックして出欠の切替ができます。<b>再生した単元・時間・出席者がそのまま実施記録</b>になります。</div>
+        <div class="grid" style="grid-template-columns:1fr 280px;">
+          <div>
+            <div class="vstage">
+              <div class="vbadge" id="vbadge">● 再生中 ／ 教育動画</div>
+              <div class="vtime">本日 13:30 / 20:00</div>
+              <div class="vplay" id="vplay"></div>
+              <div class="vctrl">
+                <span class="vc main" id="vmain">⏸ 一時停止</span>
+                <span class="vc" data-toast="次の単元へ進みました">⏭ 次の単元</span>
+                <div class="vprog"><i></i></div>
+                <span class="vc" data-toast="現在の再生位置を実施記録に反映しました">記録に反映</span>
+              </div>
+            </div>
+            <div class="card" style="margin-top:14px;">
+              <div class="card-h">いま再生中の単元</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><strong>基本教育 第6単元</strong> 警備業務に関する基本的事項<div class="mini">この単元 62% 再生</div></div>
+                <span class="pill p-gold">動画・集合教育</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-h">出席者（点呼で確認）</div>
+              <div class="att"><span class="ax ax-on">✓</span>田中 一郎</div>
+              <div class="att"><span class="ax ax-on">✓</span>鈴木 花子</div>
+              <div class="att"><span class="ax ax-on">✓</span>高橋 健</div>
+              <div class="att"><span class="ax ax-off">-</span>渡辺 修</div>
+            </div>
+            <div class="card">
+              <div class="card-h">単元の進行</div>
+              <div class="att" style="cursor:default;"><span class="ax ax-on">✓</span>1〜5 完了</div>
+              <div class="att" style="cursor:default;"><span class="ax ax-now">▶</span>6 再生中</div>
+              <div class="att" style="cursor:default;"><span class="ax ax-off">7</span>理解度テスト</div>
+              <div class="att" style="cursor:default;"><span class="ax ax-off">8</span>業務別教育へ</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:6px;"><button class="btn btn-green">この回を完了して実施記録に確定</button></div>
+        <div class="note">論点：本人確認を点呼・署名のどちらで担保するか（第13章 Q1・Q2）。出席者の行をクリックで出欠を切り替えできます。</div>
+      </div>
+
+      <!-- TEST -->
+      <div class="screen" id="test">
+        <div class="scr-intro"><b>理解度確認テストの結果。</b>知識の習得状況（法的要件ハ）を満たす証跡。合格・不合格と再受講の管理を行います。</div>
+        <div class="grid g3" style="margin-bottom:16px;">
+          <div class="kpi green"><div class="kv">9<small> 名</small></div><div class="kl">合格</div></div>
+          <div class="kpi gold"><div class="kv">2<small> 名</small></div><div class="kl">受験前</div></div>
+          <div class="kpi red"><div class="kv">1<small> 名</small></div><div class="kl">不合格（再受講）</div></div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>警備員</th><th>テスト</th><th>得点</th><th>判定</th><th>受験日</th><th></th></tr>
+            <tr><td><strong>鈴木 花子</strong></td><td>基本教育 修了</td><td>92点</td><td><span class="pill p-green">合格</span></td><td>2026/04/10</td><td></td></tr>
+            <tr><td><strong>高橋 健</strong></td><td>基本教育 修了</td><td>85点</td><td><span class="pill p-green">合格</span></td><td>2026/04/10</td><td></td></tr>
+            <tr><td><strong>佐々木 涼</strong></td><td>基本教育 修了</td><td>54点</td><td><span class="pill p-red">不合格</span></td><td>2026/04/10</td><td><button class="btn btn-sm btn-ghost">再受講を割当</button></td></tr>
+            <tr><td><strong>田中 一郎</strong></td><td>基本教育 修了</td><td>―</td><td><span class="pill p-gold">受験前</span></td><td>―</td><td></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- QA -->
+      <div class="screen" id="qa">
+        <div class="scr-intro"><b>質疑応答の記録。</b>集合教育の場での質問・回答を残し、質疑応答の機会の確保（法的要件ニ）を証跡化します。下の欄から新しい質疑を追加できます。</div>
+        <div class="card">
+          <div class="card-h">2026年度 第1教育期 の質疑</div>
+          <div style="border-left:3px solid var(--gold);padding:10px 14px;background:#FBFAF6;border-radius:0 8px 8px 0;margin-bottom:10px;">
+            <div style="font-size:12.5px;color:var(--navy);font-weight:600;">Q. 交通誘導中に事故が起きた場合、最初に取るべき行動は？</div>
+            <div class="mini" style="margin:3px 0;">質問：田中 一郎 ／ 2026/04/08</div>
+            <div style="font-size:12px;color:var(--ink-soft);">A. 二次事故防止のため…（指導教育責任者 佐藤が回答 2026/04/08）</div>
+          </div>
+          <div style="border-left:3px solid var(--line);padding:10px 14px;background:#FAFBFC;border-radius:0 8px 8px 0;">
+            <div style="font-size:12.5px;color:var(--navy);font-weight:600;">Q. 護身用具の携帯ルールについて</div>
+            <div class="mini" style="margin:3px 0;">質問：鈴木 花子 ／ 2026/04/12</div>
+            <div style="font-size:12px;color:var(--amber);">回答待ち（期限：04/15）</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">質疑を追加</div>
+          <div class="field"><label>質問</label><textarea class="inp" placeholder="受講者からの質問を入力…"></textarea></div>
+          <div class="field"><label>回答</label><textarea class="inp" placeholder="指導教育責任者の回答を入力…"></textarea></div>
+          <button class="btn btn-green">記録に追加</button>
+        </div>
+      </div>
+
+      <!-- DOCS -->
+      <div class="screen" id="docs">
+        <div class="scr-intro"><b>法定書類センター。</b>教育の完了に応じてデータが揃い、4書類をPDF生成できます。確認票・誓約書は添付書類として名簿に紐づきます。</div>
+        <h3 class="sec">法定書類4種</h3>
+        <div class="grid g2">
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">警備員名簿</div><div class="dt-law">法45条／規則66条1項1号</div></div><div class="dt-ic">名</div></div><button class="btn btn-green" data-s="pv-roster" style="width:100%;justify-content:center;">PDFを生成（12名・添付込み）</button></div>
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">教育実施簿</div><div class="dt-law">規則66条1項6号</div></div><div class="dt-ic">実</div></div><button class="btn btn-green" data-s="pv-jisshi" style="width:100%;justify-content:center;">PDFを生成（実施記録から）</button></div>
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">教育計画書</div><div class="dt-law">規則66条1項5号</div></div><div class="dt-ic">計</div></div><button class="btn btn-green" data-s="pv-keikaku" style="width:100%;justify-content:center;">PDFを生成（第1教育期）</button></div>
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">指導計画書</div><div class="dt-law">規則66条1項4号</div></div><div class="dt-ic">指</div></div><button class="btn btn-ghost" data-s="pv-shido" style="width:100%;justify-content:center;color:var(--amber);">入力が必要 ― 作成へ</button></div>
+        </div>
+        <h3 class="sec">添付書類（名簿に紐づく）</h3>
+        <div class="grid g2">
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">誓約書（警備員用）</div><div class="dt-law">名簿の添付書類</div></div><div class="dt-ic">誓</div></div><button class="btn btn-green" data-s="at-seiyaku" style="width:100%;justify-content:center;">作成・保存（11/12名）</button></div>
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">確認票</div><div class="dt-law">法定書類②／確認措置</div></div><div class="dt-ic">確</div></div><button class="btn btn-green" data-s="at-kakunin" style="width:100%;justify-content:center;">作成・保存（10/12名）</button></div>
+        </div>
+        <div class="alert a-green" style="margin-top:14px;"><span class="ai">✓</span>生成・保存した書類は保管庫に入り、保存期間（修了後2年・退職後1年）が自動管理されます。</div>
+      </div>
+
+      <!-- PV ROSTER -->
+      <div class="screen" id="pv-roster">
+        <div class="scr-intro"><b>警備員名簿のプレビュー。</b>マスタ＋添付書類（誓約書・確認票）＋教育の実施状況から自動生成されます。</div>
+        <div class="paper">
+          <div class="paper-t">警 備 員 名 簿</div>
+          <div class="paper-s">警備業法第45条／施行規則第66条第1項第1号 ｜ 株式会社○○警備 北営業所</div>
+          <div class="tbl-wrap" style="border:none;">
+            <table>
+              <tr><th>氏名</th><th>生年月日</th><th>採用日</th><th>従事業務</th><th>教育状況</th><th>誓約書/確認票</th></tr>
+              <tr><td><strong>鈴木 花子</strong></td><td>1995/06/12</td><td>2026/04/01</td><td>2号</td><td>完了(20h)</td><td>有／有</td></tr>
+              <tr><td><strong>田中 一郎</strong></td><td>1998/04/01</td><td>2026/04/01</td><td>2号</td><td>受講中</td><td>有／有</td></tr>
+              <tr><td><strong>高橋 健</strong></td><td>1990/11/20</td><td>2026/03/15</td><td>2号</td><td>完了(7h 特例)</td><td>有／未</td></tr>
+            </table>
+          </div>
+          <div class="paper-meta"><span>※ 退職者は退職後1年間 名簿上に保持</span><span>顔写真は3年以内撮影</span></div>
+        </div>
+        <div style="margin-top:13px;"><button class="btn btn-green">PDFを確定・保管</button><button class="btn btn-ghost" style="margin-left:8px;">様式を切替（都道府県）</button></div>
+      </div>
+
+      <!-- PV JISSHI -->
+      <div class="screen" id="pv-jisshi">
+        <div class="scr-intro"><b>教育実施簿のプレビュー。</b>集合教育の実施記録（動画再生＋実技）の集計から自動生成。指導教育責任者の確認が付記されます。</div>
+        <div class="paper">
+          <div class="paper-t">教 育 実 施 簿</div>
+          <div class="paper-s">施行規則 第66条第1項第6号 ｜ 北営業所 ｜ 2026年度 第1教育期</div>
+          <div class="tbl-wrap" style="border:none;">
+            <table>
+              <tr><th>実施年月日</th><th>内容</th><th>方法</th><th>時間</th><th>実施場所</th><th>対象警備員</th></tr>
+              <tr><td>2026/04/08</td><td>基本教育（法令・礼式 ほか）</td><td>動画・集合教育</td><td>15.0h</td><td>北営業所 会議室</td><td>鈴木 ほか6名</td></tr>
+              <tr><td>2026/04/12</td><td>業務別（2号 講義）</td><td>動画・集合教育</td><td>3.0h</td><td>北営業所 会議室</td><td>鈴木 ほか4名</td></tr>
+              <tr><td>2026/04/15</td><td>業務別（2号 実技訓練）</td><td>対面（実技）</td><td>2.0h</td><td>北営業所 訓練室</td><td>鈴木 ほか4名</td></tr>
+            </table>
+          </div>
+          <div class="paper-meta"><span>実施者：佐藤 三郎</span><span>指導教育責任者 確認：佐藤 三郎（2026/04/16 システム確認済）</span></div>
+        </div>
+        <div style="margin-top:13px;"><button class="btn btn-green">この内容でPDFを確定・保管</button></div>
+        <div class="note">動画・集合教育の行は実施記録から自動。実技行は責任者の手入力。両者を1つの実施簿に統合します。</div>
+      </div>
+
+      <!-- PV KEIKAKU -->
+      <div class="screen" id="pv-keikaku">
+        <div class="scr-intro"><b>教育計画書のプレビュー。</b>教育期＋割当コース＋実施者から生成。教育期開始30日前までに備付けが必要です。</div>
+        <div class="paper">
+          <div class="paper-t">教 育 計 画 書</div>
+          <div class="paper-s">施行規則 第66条第1項第5号 ｜ 北営業所 ｜ 2026年度 第1教育期</div>
+          <div class="tbl-wrap" style="border:none;">
+            <table>
+              <tr><th>実施時期</th><th>内容</th><th>方法</th><th>時間数</th><th>実施者</th><th>対象範囲</th></tr>
+              <tr><td>2026/04 上旬</td><td>基本教育</td><td>動画・集合教育</td><td>15.0h</td><td>佐藤 三郎</td><td>新任 12名</td></tr>
+              <tr><td>2026/04 中旬</td><td>業務別（2号 講義）</td><td>動画・集合教育</td><td>3.0h</td><td>佐藤 三郎</td><td>新任 12名</td></tr>
+              <tr><td>2026/04 中旬</td><td>業務別（2号 実技）</td><td>対面（実技）</td><td>2.0h</td><td>佐藤 三郎</td><td>新任 12名</td></tr>
+            </table>
+          </div>
+          <div class="paper-meta"><span>合計 20.0h（新任 一般の要件を満たす）</span><span>備付け期限：教育期開始30日前まで</span></div>
+        </div>
+        <div style="margin-top:13px;"><button class="btn btn-green">PDFを確定・保管</button></div>
+      </div>
+
+      <!-- PV SHIDO -->
+      <div class="screen" id="pv-shido">
+        <div class="scr-intro"><b>指導計画書。</b>「指導」は「教育」と別概念で、受講記録から完全自動生成はできません。<b>テンプレート補助型</b>で、左の欄に入力すると右のプレビューに反映される想定です。</div>
+        <div class="grid g2">
+          <div class="card">
+            <div class="card-h">指導計画の入力</div>
+            <div class="field"><label>対象年度</label><input class="inp" value="2026年度"></div>
+            <div class="field"><label>実地指導の予定</label><input class="inp" value="四半期ごと（4・7・10・1月）"></div>
+            <div class="field"><label>対象警備員</label><input class="inp" value="北営業所 全警備員"></div>
+            <div class="field"><label>指導内容</label><textarea class="inp">現場巡回での実地指導、改善点のフィードバック…</textarea></div>
+          </div>
+          <div class="paper">
+            <div class="paper-t">指 導 計 画 書</div>
+            <div class="paper-s">施行規則 第66条第1項第4号 ｜ 北営業所</div>
+            <div class="frow"><div class="fl">対象年度</div><div class="fv">2026年度</div></div>
+            <div class="frow"><div class="fl">実地指導 予定</div><div class="fv">四半期ごと</div></div>
+            <div class="frow"><div class="fl">対象</div><div class="fv">北営業所 全警備員</div></div>
+            <div class="frow"><div class="fl">指導教育責任者</div><div class="fv">佐藤 三郎</div></div>
+            <div class="paper-meta" style="margin-top:10px;"><span>※ 実地指導日から2年間 保存</span><span></span></div>
+          </div>
+        </div>
+        <div style="margin-top:6px;"><button class="btn btn-green">PDFを確定・保管</button></div>
+      </div>
+
+      <!-- ATTACH -->
+      <div class="screen" id="attach">
+        <div class="scr-intro"><b>添付書類センター。</b>確認票・誓約書をフォームから作成し、警備員ごとに保存。独自様式の追加・既存ファイルの貼り付けにも対応します。</div>
+        <div class="step">
+          <div class="s"><div class="sn">STEP 1</div><div class="st">様式を選ぶ</div><div class="sd">誓約書／確認票／自由様式から選択し、対象警備員を指定</div></div>
+          <div class="arr">→</div>
+          <div class="s"><div class="sn">STEP 2</div><div class="st">入力・自動差込</div><div class="sd">氏名・住所等はマスタから自動差込。残りをフォーム入力</div></div>
+          <div class="arr">→</div>
+          <div class="s"><div class="sn">STEP 3</div><div class="st">保存・紐づけ</div><div class="sd">PDF保存し、警備員レコードと名簿に自動で紐づけ</div></div>
+        </div>
+        <h3 class="sec">様式を選ぶ</h3>
+        <div class="grid g3">
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">誓約書（警備員用）</div><div class="dt-law">第14条1項 欠格事由</div></div><div class="dt-ic">誓</div></div><button class="btn btn-navy" data-s="at-seiyaku" style="width:100%;justify-content:center;">作成する</button></div>
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">確認票</div><div class="dt-law">確認措置の記録</div></div><div class="dt-ic">確</div></div><button class="btn btn-navy" data-s="at-kakunin" style="width:100%;justify-content:center;">作成する</button></div>
+          <div class="doc-tile"><div class="dt-top"><div><div class="dt-t">自由様式・貼付</div><div class="dt-law">独自書類・PDF添付</div></div><div class="dt-ic">+</div></div><button class="btn btn-navy" data-s="at-free" style="width:100%;justify-content:center;">追加する</button></div>
+        </div>
+      </div>
+
+      <!-- AT KAKUNIN -->
+      <div class="screen" id="at-kakunin">
+        <div class="scr-intro"><b>確認票の作成フォーム。</b>左で入力すると右のプレビューが本物の入力欄として編集できます。マスタから差込む項目は「自動」と表示。選択肢・有無も切替できます。</div>
+        <div class="grid" style="grid-template-columns:320px 1fr;">
+          <div class="card">
+            <div class="card-h">入力</div>
+            <div class="field"><label>対象警備員</label>
+              <select class="inp"><option>田中 一郎</option><option>鈴木 花子</option><option>高橋 健</option><option>渡辺 修</option></select>
+            </div>
+            <div class="field"><label>誓約書提出の有無</label>
+              <span class="seg"><input type="radio" name="seiyaku" id="sy1" checked><label for="sy1">有</label><input type="radio" name="seiyaku" id="sy2"><label for="sy2">無</label></span>
+            </div>
+            <div class="field"><label>学生・新卒</label>
+              <span class="seg"><input type="radio" name="gakusei" id="gk1"><label for="gk1">該当</label><input type="radio" name="gakusei" id="gk2" checked><label for="gk2">非該当</label></span>
+            </div>
+            <div class="field"><label>各号の確認措置（自由記入）</label><textarea class="inp" placeholder="第1〜7号の確認措置を入力…"></textarea></div>
+            <div class="field"><label>調査担当者</label><input class="inp" value="佐藤 三郎"></div>
+          </div>
+          <div class="paper">
+            <div class="paper-t">確 認 票</div>
+            <div class="paper-s">確認措置の記録 ｜ 対象：田中 一郎</div>
+            <div class="frow"><div class="fl">応募者氏名</div><div class="fv"><input class="docfield" value="田中 一郎"><span class="auto">自動</span></div></div>
+            <div class="frow"><div class="fl">生年月日</div><div class="fv"><input class="docfield" value="1998年4月1日"><span class="auto">自動</span></div></div>
+            <div class="frow"><div class="fl">住所・電話</div><div class="fv"><input class="docfield" value="東京都◯◯区…"><span class="auto">自動</span></div></div>
+            <div class="frow"><div class="fl">誓約書提出</div><div class="fv">● 有 ／ ○ 無</div></div>
+            <div class="frow"><div class="fl">18歳未満</div><div class="fv">非該当（生年月日から自動判定）<span class="auto">自動</span></div></div>
+            <div class="frow"><div class="fl">法第3条 各号</div><div class="fv"><input class="docfield" placeholder="確認措置を入力…"></div></div>
+            <div class="frow"><div class="fl">調査担当者</div><div class="fv"><input class="docfield" value="佐藤 三郎"> ㊞</div></div>
+          </div>
+        </div>
+        <div style="margin-top:6px;"><button class="btn btn-green">PDFを保存して名簿に紐づける</button></div>
+      </div>
+
+      <!-- AT SEIYAKU -->
+      <div class="screen" id="at-seiyaku">
+        <div class="scr-intro"><b>誓約書の作成。</b>警備業法第14条第1項の欠格事由（8項目）に該当しない旨の誓約。宛先・住所・氏名は下のプレビュー上で直接編集できます。</div>
+        <div class="paper">
+          <div class="paper-t" style="font-size:15px;">誓 約 書 （警備員用）</div>
+          <div class="paper-s">警備業法 第14条第1項 欠格事由に該当しない旨</div>
+          <div style="font-size:12px;color:var(--ink-soft);line-height:1.9;padding:6px 4px;">
+            私は、警備業法第14条第1項に掲げる ①18歳未満の者 ②破産手続開始の決定を受けて復権を得ない者 ③拘禁刑以上の刑等 ④最近5年間の法令違反等 ⑤集団的・常習的に一定の罪に当たる行為のおそれ ⑥暴力団員等に対する命令・指示を受けた者 ⑦アルコール・薬物等の中毒者 ⑧精神機能の障害により業務を適正に行えない者 ―― のいずれにも該当しないことを誓約します。
+          </div>
+          <div class="frow"><div class="fl">宛先</div><div class="fv"><input class="docfield" value="株式会社○○警備 御中"></div></div>
+          <div class="frow"><div class="fl">日付</div><div class="fv"><input class="docfield" value="2026年4月1日"></div></div>
+          <div class="frow"><div class="fl">住所</div><div class="fv"><input class="docfield" value="東京都◯◯区…"><span class="auto">自動</span></div></div>
+          <div class="frow"><div class="fl">氏名</div><div class="fv"><input class="docfield" value="田中 一郎"><span class="auto">自動</span></div></div>
+        </div>
+        <div style="margin-top:13px;"><button class="btn btn-green">PDFを保存して名簿に紐づける</button><button class="btn btn-ghost" style="margin-left:8px;">確認票と連動</button></div>
+      </div>
+
+      <!-- AT FREE -->
+      <div class="screen" id="at-free">
+        <div class="scr-intro"><b>自由様式・ファイルの貼り付け。</b>会社独自の書類をフォームで新規作成するか、既存のPDF・画像を警備員や教育記録に添付して保管します。</div>
+        <div class="grid g2">
+          <div class="card">
+            <div class="card-h">(a) 新規フォームで作成</div>
+            <div class="field"><label>書類名</label><input class="inp" value="入社時 健康状態申告書"></div>
+            <div class="field"><label>項目を追加（自由記入）</label><textarea class="inp" placeholder="テキスト項目 / 日付 / 選択肢 などを入力…"></textarea></div>
+            <button class="btn btn-navy">様式を作成</button>
+          </div>
+          <div class="card">
+            <div class="card-h">(b) 既存ファイルを貼り付け</div>
+            <div class="photo" style="width:100%;height:auto;padding:26px;border:2px dashed var(--line);border-radius:10px;color:var(--faint);font-size:12px;background:#FBFBFC;" data-toast="（プロトタイプ）ファイル選択ダイアログを開きます">ここにPDF・画像をドラッグ＆ドロップ<br><span class="mini">または クリックして選択</span></div>
+            <div class="field" style="margin-top:12px;"><label>紐づけ先</label>
+              <select class="inp"><option>田中 一郎 ／ 名簿の添付書類</option><option>鈴木 花子 ／ 名簿の添付書類</option><option>教育記録に添付</option></select>
+            </div>
+            <button class="btn btn-navy">アップロードして保管</button>
+          </div>
+        </div>
+        <div class="note">論点：(a) フォーム作成と (b) ファイル添付のどちらをどこまで初期に作るか（第13章 Q5）。</div>
+      </div>
+
+      <!-- VAULT -->
+      <div class="screen" id="vault">
+        <div class="scr-intro"><b>書類保管庫。</b>生成・保存した書類を、保存期間つきで一元管理。期限が近づくとアラートします。期間内の改ざんを防ぎます。</div>
+        <div class="card" style="padding:0;">
+          <div class="vault-row" style="background:#F6F7F9;font-weight:700;color:var(--ink-soft);font-size:11px;"><span style="width:160px;">書類</span><span style="width:120px;">対象</span><span style="width:110px;">生成日</span><span style="flex:1;">保存期限</span><span>状態</span></div>
+          <div class="vault-row"><span style="width:160px;"><strong>教育実施簿</strong></span><span style="width:120px;">2026 第1期</span><span style="width:110px;">2026/04/16</span><span style="flex:1;">2028/03/31（修了後2年）</span><span class="pill p-green">保管中</span></div>
+          <div class="vault-row"><span style="width:160px;"><strong>教育計画書</strong></span><span style="width:120px;">2026 第1期</span><span style="width:110px;">2026/03/10</span><span style="flex:1;">2028/03/31（修了後2年）</span><span class="pill p-green">保管中</span></div>
+          <div class="vault-row"><span style="width:160px;"><strong>警備員名簿</strong></span><span style="width:120px;">退職者 山田</span><span style="width:110px;">2026/02/01</span><span style="flex:1;">2027/01/31（退職後1年）</span><span class="pill p-gold">期限90日前</span></div>
+          <div class="vault-row"><span style="width:160px;"><strong>確認票</strong></span><span style="width:120px;">田中 一郎</span><span style="width:110px;">2026/04/01</span><span style="flex:1;">名簿に準ずる</span><span class="pill p-green">保管中</span></div>
+        </div>
+      </div>
+
+      <!-- ALERTS -->
+      <div class="screen" id="alerts">
+        <div class="scr-intro"><b>アラート一覧。</b>法令の期限と運用上の不備を、種類ごとにまとめて把握できます。各「対応」ボタンで該当画面へ。</div>
+        <div class="alert a-amber"><span class="ai">!</span><div><strong>教育計画書の備付け期限</strong> ― 2026年度 第1教育期、あと8日</div><button class="btn btn-sm btn-ghost" data-s="plan" style="margin-left:auto;">対応</button></div>
+        <div class="alert a-red"><span class="ai">!</span><div><strong>顔写真の更新期限（3年）超過</strong> ― 渡辺 修</div><button class="btn btn-sm btn-ghost" data-s="guard" style="margin-left:auto;">対応</button></div>
+        <div class="alert a-amber"><span class="ai">!</span><div><strong>確認票が未登録</strong> ― 高橋 健</div><button class="btn btn-sm btn-ghost" data-s="at-kakunin" style="margin-left:auto;">作成</button></div>
+        <div class="alert a-amber"><span class="ai">!</span><div><strong>未実施の警備員</strong> ― 渡辺 修（新任教育 0%）</div><button class="btn btn-sm btn-ghost" data-s="session" style="margin-left:auto;">教育へ</button></div>
+        <div class="alert a-green"><span class="ai">✓</span><div><strong>保管書類の保存期限</strong> ― 直近で満了する書類はありません</div></div>
+      </div>
+
+      <!-- INSPECTION -->
+      <div class="screen" id="inspection">
+        <div class="scr-intro"><b>立入検査モード。</b>対象営業所の備付け書類を一画面に揃え、その場で提示できる状態にします。本システムで整備済の書類が一目で分かります。</div>
+        <div class="card" style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+          <div><strong>北営業所</strong> の備付け書類 整備状況<div class="mini">2026年度 第1教育期 時点</div></div>
+          <button class="btn btn-navy">一式をPDFでまとめて出力</button>
+        </div>
+        <div class="insp"><span class="ic ic-ok">✓</span><span class="iname">① 警備員名簿（誓約書・確認票を含む）</span><span class="pill p-green">本システムで整備済</span></div>
+        <div class="insp"><span class="ic ic-ok">✓</span><span class="iname">② 確認票</span><span class="pill p-green">添付書類で整備済</span></div>
+        <div class="insp"><span class="ic ic-ok">✓</span><span class="iname">④ 指導計画書</span><span class="pill p-green">本システムで整備済</span></div>
+        <div class="insp"><span class="ic ic-ok">✓</span><span class="iname">⑤ 教育計画書</span><span class="pill p-green">本システムで整備済</span></div>
+        <div class="insp"><span class="ic ic-ok">✓</span><span class="iname">⑥ 教育実施簿</span><span class="pill p-green">本システムで整備済</span></div>
+        <div class="insp"><span class="ic ic-no">-</span><span class="iname">③ 護身用具数量書面　⑦ 警備契約一覧表　⑧ 苦情処理簿</span><span class="pill p-gray">スコープ外／将来拡張</span></div>
+      </div>
+
+      <!-- HQ -->
+      <div class="screen" id="hq">
+        <div class="scr-intro"><b>法人ダッシュボード（本社）。</b>配下の全営業所を横断して、教育の進捗・書類の整備状況を俯瞰します。営業所行の「開く」で営業所ビューへ。</div>
+        <div class="grid g4" style="margin-bottom:16px;">
+          <div class="kpi"><div class="kv">5<small> 拠点</small></div><div class="kl">営業所</div></div>
+          <div class="kpi"><div class="kv">68<small> 名</small></div><div class="kl">警備員 合計</div></div>
+          <div class="kpi green"><div class="kv">82<small>%</small></div><div class="kl">教育完了率</div></div>
+          <div class="kpi red"><div class="kv">3<small> 件</small></div><div class="kl">要対応アラート</div></div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>営業所</th><th>警備員</th><th>教育完了率</th><th>書類整備</th><th>アラート</th><th></th></tr>
+            <tr class="clickrow" data-s="dash"><td><strong>北営業所</strong></td><td>12</td><td><span class="bar"><i style="width:58%;background:var(--gold)"></i></span> 58%</td><td><span class="pill p-gold">一部未</span></td><td>2</td><td><button class="btn btn-sm btn-ghost" data-s="dash">開く</button></td></tr>
+            <tr class="clickrow" data-s="dash"><td><strong>南営業所</strong></td><td>18</td><td><span class="bar"><i style="width:100%;background:var(--forest)"></i></span> 100%</td><td><span class="pill p-green">整備済</span></td><td>0</td><td><button class="btn btn-sm btn-ghost" data-s="dash">開く</button></td></tr>
+            <tr class="clickrow" data-s="dash"><td><strong>東営業所</strong></td><td>15</td><td><span class="bar"><i style="width:93%;background:var(--forest)"></i></span> 93%</td><td><span class="pill p-green">整備済</span></td><td>0</td><td><button class="btn btn-sm btn-ghost" data-s="dash">開く</button></td></tr>
+            <tr class="clickrow" data-s="dash"><td><strong>西営業所</strong></td><td>14</td><td><span class="bar"><i style="width:71%;background:var(--gold)"></i></span> 71%</td><td><span class="pill p-gold">一部未</span></td><td>1</td><td><button class="btn btn-sm btn-ghost" data-s="dash">開く</button></td></tr>
+            <tr class="clickrow" data-s="dash"><td><strong>中央営業所</strong></td><td>9</td><td><span class="bar"><i style="width:100%;background:var(--forest)"></i></span> 100%</td><td><span class="pill p-green">整備済</span></td><td>0</td><td><button class="btn btn-sm btn-ghost" data-s="dash">開く</button></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- OFFICES -->
+      <div class="screen" id="offices">
+        <div class="scr-intro"><b>営業所の一覧・追加。</b>営業所は教育と法定書類の基本単位。指導教育責任者・取扱う業務区分を設定します。</div>
+        <div class="card" style="display:flex;align-items:center;gap:10px;"><div style="flex:1;font-size:12px;color:var(--ink-soft);">営業所を追加すると、その営業所のダッシュボード・書類保管庫が用意されます。</div><button class="btn btn-navy">＋ 営業所を追加</button></div>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>営業所</th><th>所在地</th><th>指導教育責任者</th><th>取扱う業務区分</th><th>警備員</th></tr>
+            <tr><td><strong>北営業所</strong></td><td>東京都◯◯区</td><td>佐藤 三郎</td><td>2号</td><td>12</td></tr>
+            <tr><td><strong>南営業所</strong></td><td>東京都△△区</td><td>伊藤 浩</td><td>1号・2号</td><td>18</td></tr>
+            <tr><td><strong>東営業所</strong></td><td>千葉県…</td><td>山本 大輔</td><td>2号</td><td>15</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- TENANTS -->
+      <div class="screen" id="tenants">
+        <div class="scr-intro"><b>テナント管理（ThreeX運営）。</b>契約している警備会社（法人）を管理します。法人間のデータは完全に分離されます。</div>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>法人</th><th>営業所数</th><th>警備員</th><th>契約プラン</th><th>状態</th></tr>
+            <tr><td><strong>株式会社○○警備</strong></td><td>5</td><td>68</td><td>営業所月額</td><td><span class="pill p-green">稼働中</span></td></tr>
+            <tr><td><strong>△△セキュリティ株式会社</strong></td><td>2</td><td>22</td><td>法人月額</td><td><span class="pill p-green">稼働中</span></td></tr>
+            <tr><td><strong>株式会社□□警備保障</strong></td><td>1</td><td>9</td><td>トライアル</td><td><span class="pill p-gold">試用中</span></td></tr>
+          </table>
+        </div>
+        <div class="note">課金モデル（法人月額／営業所月額／従量）は第13章 Q7の論点。</div>
+      </div>
+
+      <!-- VIDEOS -->
+      <div class="screen" id="videos">
+        <div class="scr-intro"><b>教育動画マスタ（ThreeX運営）。</b>単元ごとの動画・想定時間・確認テストを整備。既存DVD教材の転用もここで管理します。</div>
+        <h3 class="sec">新任教育（基本教育）</h3>
+        <div class="tbl-wrap" style="margin-bottom:16px;">
+          <table>
+            <tr><th>単元</th><th>想定時間</th><th>確認テスト</th><th>区分</th><th>状態</th></tr>
+            <tr><td>1. 警備業法の概要</td><td>2.0h</td><td>有</td><td>動画</td><td><span class="pill p-green">公開</span></td></tr>
+            <tr><td>2. 礼式・基本動作</td><td>2.0h</td><td>有</td><td>動画</td><td><span class="pill p-green">公開</span></td></tr>
+            <tr><td>6. 警備業務の基本的事項</td><td>3.0h</td><td>有</td><td>動画</td><td><span class="pill p-green">公開</span></td></tr>
+          </table>
+        </div>
+        <h3 class="sec">業務別教育（2号）</h3>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>単元</th><th>想定時間</th><th>区分</th><th>状態</th></tr>
+            <tr><td>2号 講義（交通誘導の基礎 ほか）</td><td>3.0h</td><td>動画</td><td><span class="pill p-green">公開</span></td></tr>
+            <tr><td>2号 実技訓練</td><td>2.0h</td><td><span class="pill p-navy">対面・実技</span></td><td>―</td></tr>
+          </table>
+        </div>
+        <div class="note">「対面・実技」フラグの単元は動画教育と区別し、実施簿で正しく合算されます。</div>
+      </div>
+
+      <!-- TEMPLATES -->
+      <div class="screen" id="templates">
+        <div class="scr-intro"><b>様式テンプレート管理（ThreeX運営）。</b>法定書類4種と添付書類の様式を保守。都道府県差異に応じてテンプレートを切り替えられる構造です。</div>
+        <div class="tbl-wrap">
+          <table>
+            <tr><th>様式</th><th>種別</th><th>対応</th><th>更新日</th></tr>
+            <tr><td>教育実施簿</td><td>法定書類</td><td>全国共通／東京 ほか</td><td>2026/05/01</td></tr>
+            <tr><td>教育計画書</td><td>法定書類</td><td>全国共通</td><td>2026/05/01</td></tr>
+            <tr><td>警備員名簿</td><td>法定書類</td><td>全国共通</td><td>2026/05/01</td></tr>
+            <tr><td>確認票</td><td>添付書類</td><td>標準</td><td>2026/05/27</td></tr>
+            <tr><td>誓約書（警備員用）</td><td>添付書類</td><td>標準</td><td>2026/05/27</td></tr>
+          </table>
+        </div>
+        <div class="note">様式の都道府県差異への対応範囲は第13章 Q3の論点。</div>
+      </div>
+
+      <!-- LEARNER -->
+      <div class="screen" id="learner">
+        <div class="scr-intro"><b>受講者ビュー（警備員）。</b>集合教育では責任者が進行するため個別ログインは必須ではありませんが、出席確認・テスト受験用の簡易画面を想定します。</div>
+        <div class="grid g2">
+          <div class="card">
+            <div class="card-h">今日の教育</div>
+            <div style="font-size:13px;color:var(--navy);font-weight:700;">2026/04/08 北営業所 会議室</div>
+            <div class="mini" style="margin:4px 0 12px;">基本教育（15.0h）／ 指導教育責任者：佐藤</div>
+            <button class="btn btn-gold">出席を確認（タップ／署名）</button>
+          </div>
+          <div class="card">
+            <div class="card-h">理解度テスト</div>
+            <div class="att" style="cursor:default;"><span class="ax ax-on">✓</span>基本教育 修了テスト（合格 92点）</div>
+            <div class="att" style="cursor:default;"><span class="ax ax-off">7</span>業務別教育 修了テスト（未受験）</div>
+            <button class="btn btn-ghost" style="margin-top:10px;">テストを受ける</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">私の受講状況</div>
+          <div style="display:flex;align-items:center;gap:12px;"><span class="bar" style="width:200px;"><i style="width:62%;background:var(--gold)"></i></span><span style="font-size:13px;font-weight:700;color:var(--navy);">12.4h / 20h</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+  var titles={
+    dash:["営業所管理者 ／ ダッシュボード","ダッシュボード"],
+    guards:["営業所管理者 ／ 警備員","警備員一覧"],
+    guard:["営業所管理者 ／ 警備員 ／ 詳細","警備員 詳細・登録"],
+    plan:["営業所管理者 ／ 教育計画","教育計画（教育期）"],
+    session:["営業所管理者 ／ 集合教育","集合教育 実施（動画）"],
+    test:["営業所管理者 ／ 理解度テスト","理解度テスト 結果"],
+    qa:["営業所管理者 ／ 質疑応答","質疑応答 記録"],
+    docs:["営業所管理者 ／ 法定書類","法定書類センター"],
+    "pv-roster":["法定書類 ／ プレビュー","警備員名簿 プレビュー"],
+    "pv-jisshi":["法定書類 ／ プレビュー","教育実施簿 プレビュー"],
+    "pv-keikaku":["法定書類 ／ プレビュー","教育計画書 プレビュー"],
+    "pv-shido":["法定書類 ／ プレビュー","指導計画書 プレビュー"],
+    attach:["営業所管理者 ／ 添付書類","添付書類センター"],
+    "at-kakunin":["添付書類 ／ 作成","確認票 作成"],
+    "at-seiyaku":["添付書類 ／ 作成","誓約書 作成"],
+    "at-free":["添付書類 ／ 作成","自由様式・ファイル貼付"],
+    vault:["営業所管理者 ／ 保管庫","書類保管庫（保存期限）"],
+    alerts:["営業所管理者 ／ アラート","アラート一覧"],
+    inspection:["営業所管理者 ／ 立入検査","立入検査モード"],
+    hq:["法人管理者 ／ ダッシュボード","法人ダッシュボード"],
+    offices:["法人管理者 ／ 営業所","営業所 一覧・追加"],
+    tenants:["システム管理者 ／ テナント","テナント管理"],
+    videos:["システム管理者 ／ 教材","教育動画マスタ"],
+    templates:["システム管理者 ／ 様式","様式テンプレート"],
+    learner:["警備員 ／ 受講","受講者ビュー"]
+  };
+  var ctxMap={
+    hq:["全営業所","法人管理者 鈴木","鈴"], offices:["全営業所","法人管理者 鈴木","鈴"],
+    tenants:["ThreeX 運営","システム管理者","T"], videos:["ThreeX 運営","システム管理者","T"], templates:["ThreeX 運営","システム管理者","T"],
+    learner:["北営業所","警備員 田中","田"]
+  };
+  function byId(id){return document.getElementById(id);}
+  function show(id){
+    var screens=document.querySelectorAll('.screen');
+    for(var i=0;i<screens.length;i++){screens[i].classList.remove('active');}
+    var el=byId(id); if(!el){return;} el.classList.add('active');
+    var links=document.querySelectorAll('.nav a');
+    for(var j=0;j<links.length;j++){links[j].classList.toggle('active',links[j].getAttribute('data-s')===id);}
+    var t=titles[id]||["",""]; byId('crumb').textContent=t[0]; byId('title').textContent=t[1];
+    var c=ctxMap[id]||["北営業所","指導教育責任者 佐藤","佐"];
+    byId('ctx').textContent=c[0]; byId('who').textContent=c[1]; byId('ava').textContent=c[2];
+    try{ document.querySelector('.canvas').scrollIntoView({block:'start'}); }catch(e){}
+    window.scrollTo(0,0);
+  }
+  var toastEl=byId('toast'); var toastTimer=null;
+  function toast(msg){
+    if(!toastEl){return;}
+    toastEl.textContent=msg; toastEl.classList.add('show');
+    if(toastTimer){clearTimeout(toastTimer);}
+    toastTimer=setTimeout(function(){toastEl.classList.remove('show');},1900);
+  }
+  var playing=true;
+  function togglePlay(){
+    playing=!playing;
+    var main=byId('vmain'); var badge=byId('vbadge'); var pl=byId('vplay');
+    if(main){main.textContent=playing?'⏸ 一時停止':'▶ 再生';}
+    if(badge){badge.textContent=playing?'● 再生中 ／ 教育動画':'❚❚ 一時停止中';}
+    if(pl){pl.classList.toggle('paused',!playing);}
+    toast(playing?'再生を再開しました':'一時停止しました');
+  }
+  // search filter on guards list
+  document.addEventListener('input',function(e){
+    if(e.target && e.target.id==='guardSearch'){
+      var q=e.target.value.trim().toLowerCase();
+      var rows=document.querySelectorAll('#guardTable tbody tr');
+      for(var i=0;i<rows.length;i++){
+        var key=(rows[i].getAttribute('data-name')||rows[i].textContent).toLowerCase();
+        rows[i].style.display = (q==='' || key.indexOf(q)>-1) ? '' : 'none';
+      }
+    }
+  });
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    // never hijack clicks on real form controls
+    if(t.closest('input, textarea, select, label')){ return; }
+    var nav=t.closest('[data-s]');
+    if(nav){ e.preventDefault(); show(nav.getAttribute('data-s')); return; }
+    var dt=t.closest('[data-toast]');
+    if(dt){ toast(dt.getAttribute('data-toast')); return; }
+    var att=t.closest('.att');
+    if(att && att.style.cursor!=='default'){
+      var ax=att.querySelector('.ax');
+      if(ax){
+        var on=ax.classList.contains('ax-on');
+        ax.classList.toggle('ax-on',!on); ax.classList.toggle('ax-off',on);
+        ax.textContent=on?'-':'✓';
+        toast(on?'欠席に変更しました':'出席に変更しました');
+      }
+      return;
+    }
+    var vmain=t.closest('#vmain, #vplay');
+    if(vmain){ togglePlay(); return; }
+    var btn=t.closest('button, .btn');
+    if(btn){
+      var label=(btn.textContent||'操作').trim().replace(/\s+/g,' ');
+      if(label.length>26){label=label.slice(0,26)+'…';}
+      toast('（プロトタイプ）'+label);
+      return;
+    }
+  });
+  show('dash');
+})();
+</script>
+</body>
+</html>
